@@ -2,11 +2,10 @@
 
 HOSTNAME=$(hostname)
 
-if [ -f /etc/os-release ]; then
-	. /etc/os-release
-	DISTRONAME=$PRETTY_NAME
-fi
+. /etc/os-release
+DISTRONAME=$PRETTY_NAME
 
+KERNEL_VERSION=$(uname -r)
 # CPU Info
 ARCH=$(lscpu | grep "CPU op-mode(s):" | awk -F ':' '{print $2}' | xargs)
 mapfile -t cpu_hz_array < <(lscpu -p=Modelname,mhz | grep -v '^#' | awk -F',' '{ printf "%s %fMHz\n",$1, $2 }')
@@ -14,10 +13,11 @@ mapfile -t cpu_hz_array < <(lscpu -p=Modelname,mhz | grep -v '^#' | awk -F',' '{
 
 echo "Hostname: $HOSTNAME"
 echo "Distro Name: $DISTRONAME"
+echo "Kernel version: $KERNEL_VERSION"
 
 echo "CPU Opcode(s): $ARCH"
 for i in "${!cpu_hz_array[@]}"; do
-	echo "Core $i: ${cpu_hz_array[$i]}"
+	echo "CPU $i: ${cpu_hz_array[$i]}"
 done
 echo ""
 
