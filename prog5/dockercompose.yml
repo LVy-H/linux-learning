@@ -1,0 +1,39 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8000:80"
+    volumes:
+      - ./server/:/var/www/html
+    environment:
+      DB_HOST: db
+      DB_NAME: mydatabase
+      DB_USER: root
+      DB_PASSWORD: rootpassword
+
+  db:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mydatabase
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  seed:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    entrypoint: ["php", "/var/www/html/src/seed.php"]
+    environment:
+      DB_HOST: db
+      DB_NAME: mydatabase
+      DB_USER: root
+      DB_PASSWORD: rootpassword
+    volumes:
+      - ./server/:/var/www/html
+    restart: "no"
