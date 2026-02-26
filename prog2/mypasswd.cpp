@@ -1,4 +1,5 @@
 #include <crypt.h>
+#include <ctime>
 #include <fstream>
 #include <iostream>
 #include <random>
@@ -6,6 +7,7 @@
 #include <stdexcept>
 #include <termios.h>
 #include <unistd.h>
+#include <vector>
 
 using namespace std;
 
@@ -157,34 +159,33 @@ public:
         continue;
       }
       auto fields = line | std::views::split(':');
-      auto it = fields.begin();
-
-      // Field 1: username
-      //
-      if (it == fields.end()) {
-        file_content += line + '\n';
-        continue;
+      vector<string> parts;
+      for (auto field : fields) {
+        parts.emplace_back(field.data(), field.size());
       }
-      auto user_rng = *it;
-      string user_in_file = string(user_rng.data(), user_rng.size());
-      if (user_in_file != username) {
+
+      if (parts.empty()) {
         file_content += line + '\n';
         continue;
       }
 
-      if (++it == fields.end())
+      if (parts[0] != username) {
+        file_content += line + '\n';
+        continue;
+      }
+
+      if (parts.size() < 3)
         throw runtime_error("Malformed /etc/shadow entry for " + username);
-      // Field 2: password hash
-      file_content += username + ':' + new_hash + ':';
 
-      // Field 3: modification date
-      file_content += today + ':';
+      parts[1] = new_hash;
+      parts[2] = today;
 
-      for (++it; it != fields.end(); ++it) {
-        auto field_rng = *it;
-        file_content += string(field_rng.data(), field_rng.size()) + ':';
+      for (size_t i = 0; i < parts.size(); ++i) {
+        if (i > 0)
+          file_content += ':';
+        file_content += parts[i];
       }
-      file_content.back() = '\n'; // Replace last ':' with '\n'
+      file_content += '\n';
       updated = true;
     }
 
