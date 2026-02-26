@@ -54,6 +54,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $ext      = pathinfo($_FILES['avatar_file']['name'], PATHINFO_EXTENSION);
             $filename = bin2hex(random_bytes(16)) . '.' . $ext;
             if (move_uploaded_file($_FILES['avatar_file']['tmp_name'], $uploadDir . $filename)) {
+                // Remove old avatar file if it was a locally stored file
+                if ($avatar && !filter_var($avatar, FILTER_VALIDATE_URL)) {
+                    $oldFile = $uploadDir . basename($avatar);
+                    if (is_file($oldFile)) {
+                        @unlink($oldFile);
+                    }
+                }
                 $avatar = $filename;
             } else {
                 $error = 'Failed to save avatar file.';

@@ -62,13 +62,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-    // Teacher: delete assignment
     } elseif ($action === 'delete' && $isTeacher) {
         $assignId = (int)($_POST['assignment_id'] ?? 0);
         $chk = $pdo->prepare("SELECT file_path, title FROM assignments WHERE id = ?");
         $chk->execute([$assignId]);
         $asgn = $chk->fetch();
         if ($asgn) {
+            // Delete associated submission files from disk before cascading DB delete
+            $subs = $pdo->prepare("SELECT file_path FROM submissions WHERE assignment_id = ?");
+            $subs->execute([$assignId]);
+            foreach ($subs->fetchAll() as $sub) {
+                @unlink($uploadSubmitDir . basename($sub['file_path']));
+            }
             $del = $pdo->prepare("DELETE FROM assignments WHERE id = ?");
             $del->execute([$assignId]);
             @unlink($uploadAssignDir . basename($asgn['file_path']));

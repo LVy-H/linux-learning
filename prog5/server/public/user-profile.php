@@ -34,6 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $content = trim($_POST['content'] ?? '');
         if ($content === '') {
             $error = 'Message cannot be empty.';
+        } elseif (mb_strlen($content) > 2000) {
+            $error = 'Message must be 2000 characters or fewer.';
         } else {
             $ins = $pdo->prepare("INSERT INTO messages (sender_id, receiver_id, content) VALUES (?, ?, ?)");
             $ins->execute([$myId, $profileId, $content]);
@@ -46,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $chk = $pdo->prepare("SELECT sender_id FROM messages WHERE id = ?");
         $chk->execute([$msgId]);
         $msg = $chk->fetch();
-        if ($msg && (int)$msg['sender_id'] === $myId && $content !== '') {
+        if ($msg && (int)$msg['sender_id'] === $myId && $content !== '' && mb_strlen($content) <= 2000) {
             $upd = $pdo->prepare("UPDATE messages SET content = ?, updated_at = NOW() WHERE id = ?");
             $upd->execute([$content, $msgId]);
             $success = 'Message updated.';

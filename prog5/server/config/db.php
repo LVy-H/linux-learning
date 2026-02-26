@@ -31,7 +31,12 @@ function init_db() {
     // Migration: add avatar column if table already existed without it
     try {
         $pdo->exec("ALTER TABLE users ADD COLUMN avatar VARCHAR(255)");
-    } catch (PDOException $e) { /* column already exists */ }
+    } catch (PDOException $e) {
+        // 42S21 / error 1060 = Duplicate column name; anything else is a real error
+        if ($e->getCode() !== '42S21' && (int)$e->errorInfo[1] !== 1060) {
+            throw $e;
+        }
+    }
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS messages (
         id INT AUTO_INCREMENT PRIMARY KEY,
