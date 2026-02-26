@@ -1,0 +1,70 @@
+services:
+
+  db:
+    image: mariadb:10.11
+    container_name: wp_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE:      ${MYSQL_DATABASE}
+      MYSQL_USER:          ${MYSQL_USER}
+      MYSQL_PASSWORD:      ${MYSQL_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - wp_net
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  wordpress:
+    image: wordpress:6.5-php8.2-apache
+    container_name: wp_app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST:     db:3306
+      WORDPRESS_DB_NAME:     ${MYSQL_DATABASE}
+      WORDPRESS_DB_USER:     ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+      WORDPRESS_TABLE_PREFIX: wp_
+      # Make file uploads work without authentication warnings
+      WORDPRESS_CONFIG_EXTRA: "define('FS_METHOD', 'direct');"
+    volumes:
+      - wp_data:/var/www/html
+      - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
+    ports:
+      - "${WP_PORT}:80"
+    networks:
+      - wp_net
+
+  # WP-CLI: runs once to finish setup (create test accounts, set title etc.)
+  wpcli:
+    image: wordpress:cli-php8.2
+    container_name: wp_cli
+    restart: "no"
+    depends_on:
+      - wordpress
+    environment:
+      WORDPRESS_DB_HOST:     db:3306
+      WORDPRESS_DB_NAME:     ${MYSQL_DATABASE}
+      WORDPRESS_DB_USER:     ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - wp_data:/var/www/html
+      - ./setup.sh:/setup.sh:ro
+    entrypoint: /bin/sh
+    command: /setup.sh
+    networks:
+      - wp_net
+
+volumes:
+  db_data:
+  wp_data:
+
+networks:
+  wp_net:
