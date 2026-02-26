@@ -7,3 +7,5 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_executable(myid myid.cpp)
 add_executable(mypasswd mypasswd.cpp)
 
+target_link_libraries(mypasswd crypt)
+
