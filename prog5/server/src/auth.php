@@ -14,6 +14,7 @@ function login($username, $password) {
         $_SESSION['fullname'] = $user['fullname'];
         $_SESSION['email'] = $user['email'];
         $_SESSION['phone'] = $user['phone'];
+        $_SESSION['avatar'] = $user['avatar'] ?? '';
         $_SESSION['role'] = $user['role'];
         return true;
     }
