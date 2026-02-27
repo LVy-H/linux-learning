@@ -29,7 +29,7 @@ def main():
         f"Host: {host}:{port}\r\n"
         f"Connection: close\r\n"
         f"Content-Type: application/x-www-form-urlencoded\r\n"
-        f"Cookie: wordpress_test_cookie=WP+Cookie+check\r\n"
+        f"Cookie: wordpress_test_cookie=a\r\n"
         f"Content-Length: {len(body)}\r\n"
         f"\r\n"
     ).encode() + body

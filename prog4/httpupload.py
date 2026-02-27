@@ -1,3 +1,4 @@
+import json
 import socket
 import os
 import re
@@ -112,16 +113,12 @@ def main():
     status, resp_body = parse_response(send(host, port, upload_req))
     resp_str = resp_body.decode(errors='replace')
 
-    if status == 200:
-        m = re.search(r'"url"\s*:\s*"([^"]+)"', resp_str)
-        print("Upload success. File upload url:")
-        print(m.group(1).replace('\\/', '/') if m else '(url not found in response)')
-    else:
-        print(f"Upload failed. (HTTP {status})")
-        m = re.search(r'"message"\s*:\s*"([^"]+)"', resp_str)
-        if m:
-            print(f"Reason: {m.group(1)}")
-
+    print(f"Upload response status: {status}\n ")
+    try:
+        resp_json = json.loads(resp_str)
+        print("Link: ", resp_json.get("data").get('url', '(url not found in response)'))
+    except json.JSONDecodeError:
+        print("Response is not valid JSON.")
 
 if __name__ == '__main__':
     main()

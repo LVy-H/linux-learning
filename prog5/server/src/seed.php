@@ -5,7 +5,6 @@ require_once __DIR__ . '/auth.php';
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
-// initialize schema
 if (function_exists('init_db')) {
   init_db();
   echo "Database schema ensured.\n";
@@ -20,7 +19,6 @@ $users = [
   ['username'=>'student2','password'=>'123456a@A','fullname'=>'Student Two','role'=>'student','email'=> 'student2@example.com','phone'=>''],
 ];
 
-// Insert users using register() from auth.php when they don't exist
 $check = $pdo->prepare('SELECT id FROM users WHERE username = ?');
 foreach ($users as $u) {
   $check->execute([$u['username']]);
