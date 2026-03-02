@@ -1,0 +1,4 @@
+/run/host/mnt/Data/Workspace/1_Projects/VCS-training-tasks/prog2/CMakeFiles/myid.dir
+/run/host/mnt/Data/Workspace/1_Projects/VCS-training-tasks/prog2/CMakeFiles/mypasswd.dir
+/run/host/mnt/Data/Workspace/1_Projects/VCS-training-tasks/prog2/CMakeFiles/edit_cache.dir
+/run/host/mnt/Data/Workspace/1_Projects/VCS-training-tasks/prog2/CMakeFiles/rebuild_cache.dir

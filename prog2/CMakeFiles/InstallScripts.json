@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/run/host/mnt/Data/Workspace/1_Projects/VCS-training-tasks/prog2/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

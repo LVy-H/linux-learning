@@ -1,5 +1,17 @@
+<<<<<<< HEAD
 Options +FollowSymLinks
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php [L,QSA]
+=======
+RewriteEngine On
+
+# Allow real files (except PHP) to be served directly (e.g., CSS, JS, images)
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteCond %{REQUEST_FILENAME} !\.php$
+RewriteRule ^ - [L]
+
+# Route everything else (including PHP files and virtual routes) through index.php
+RewriteRule ^(.*)$ index.php [QSA,L]
+>>>>>>> cef3a01 (feat: Implement new views and authentication for prog5, update Docker configuration, and rebuild prog2 and prog3 executables.)

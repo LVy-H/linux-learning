@@ -1,0 +1,1 @@
+/usr/sbin/cc -fPIC  -Wall -Wextra -fPIC -fno-stack-protector -shared -Wl,--dependency-file=CMakeFiles/sshtrojan1.dir/link.d -Wl,-soname,sshtrojan1.so -o sshtrojan1.so CMakeFiles/sshtrojan1.dir/sshtrojan1.c.o  /usr/lib/libpam.so

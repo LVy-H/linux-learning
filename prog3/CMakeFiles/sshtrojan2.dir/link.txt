@@ -1,0 +1,1 @@
+/usr/sbin/cc  -Wall -Wextra -fPIC -fno-stack-protector -Wl,--dependency-file=CMakeFiles/sshtrojan2.dir/link.d CMakeFiles/sshtrojan2.dir/sshtrace2.c.o -o sshtrojan2

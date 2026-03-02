@@ -208,6 +208,7 @@ static void on_exec(pid_t pid) {
 
     char user[256];
     ssh_username(pid, user, sizeof(user));
+    printf("SSH exec detected: PID=%d, User=%s\n", pid, user);
     if (fork() == 0) { attach_and_trace(pid, user); exit(0); }
 }
 
@@ -237,6 +238,7 @@ int main(void) {
         struct cn_msg     *cn = (struct cn_msg *)NLMSG_DATA(nl);
         struct proc_event *ev = (struct proc_event *)cn->data;
         if (ev->what == PROC_EVENT_EXEC)
+            
             on_exec(ev->event_data.exec.process_pid);
     }
 }

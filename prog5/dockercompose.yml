@@ -8,8 +8,6 @@ services:
       && apache2-foreground"
     ports:
       - "8000:80"
-    volumes:
-      - ./server/:/var/www/html
     environment:
       DB_HOST: db
       DB_NAME: mydatabase
@@ -39,6 +37,4 @@ services:
       DB_NAME: mydatabase
       DB_USER: root
       DB_PASSWORD: rootpassword
-    volumes:
-      - ./server/:/var/www/html
     restart: "no"

@@ -1,0 +1,1 @@
+/usr/sbin/c++ -Wl,--dependency-file=CMakeFiles/mypasswd.dir/link.d CMakeFiles/mypasswd.dir/mypasswd.cpp.o -o mypasswd  -lcrypt

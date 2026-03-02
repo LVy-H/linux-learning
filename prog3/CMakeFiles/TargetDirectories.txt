@@ -1,0 +1,4 @@
+/run/host/mnt/Data/Workspace/1_Projects/VCS-training-tasks/prog3/CMakeFiles/sshtrojan1.dir
+/run/host/mnt/Data/Workspace/1_Projects/VCS-training-tasks/prog3/CMakeFiles/sshtrojan2.dir
+/run/host/mnt/Data/Workspace/1_Projects/VCS-training-tasks/prog3/CMakeFiles/edit_cache.dir
+/run/host/mnt/Data/Workspace/1_Projects/VCS-training-tasks/prog3/CMakeFiles/rebuild_cache.dir
