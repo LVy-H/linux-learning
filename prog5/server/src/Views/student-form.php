@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Core\Csrf;
+
 $title = $mode === 'create' ? 'Add Student' : 'Edit Student';
 ob_start();
 ?>
@@ -12,6 +14,7 @@ ob_start();
 <?php endif; ?>
 
 <form method="POST" action="<?= $mode === 'create' ? '/teacher/students' : '/teacher/students/' . (int)$student['id'] . '/update' ?>" class="bg-white border border-slate-200 rounded-xl p-5 space-y-3 max-w-2xl shadow-sm">
+    <input type="hidden" name="_csrf_token" value="<?= htmlspecialchars(Csrf::token()) ?>">
     <div>
         <label class="block text-sm mb-1">Username</label>
         <input class="w-full border border-slate-300 rounded-lg p-2.5" name="username" required value="<?= htmlspecialchars((string)($student['username'] ?? '')) ?>">

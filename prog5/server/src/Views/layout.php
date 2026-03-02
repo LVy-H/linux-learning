@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Core\Auth;
+use App\Core\Csrf;
 
 $me = Auth::user();
 ?>
@@ -34,6 +35,7 @@ $me = Auth::user();
                 <?= htmlspecialchars($me['fullname'] ?? $me['username']) ?> · <?= htmlspecialchars($me['role'] ?? '') ?>
             </span>
             <form method="POST" action="/logout">
+                <input type="hidden" name="_csrf_token" value="<?= htmlspecialchars(Csrf::token()) ?>">
                 <button class="px-3 py-2 bg-slate-900 hover:bg-slate-700 text-white rounded-lg text-sm" type="submit">Logout</button>
             </form>
         <?php else: ?>

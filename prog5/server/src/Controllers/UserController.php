@@ -23,12 +23,26 @@ final class UserController
 
     public function show(string $id): Response
     {
+        $currentUser = Auth::user();
         $user = (new User())->findById((int) $id);
-        $messages = $user ? (new Message())->forReceiver((int) $id) : [];
+        if (!$user) {
+            return Response::html(View::render('user-detail', [
+                'user' => null,
+                'messages' => [],
+                'currentUser' => $currentUser,
+            ]), 404);
+        }
+
+        $isOwner = (int) ($currentUser['id'] ?? 0) === (int) $id;
+
+        $messages = (new Message())->forReceiver((int) $id);
+        $messages = array_filter($messages, function ($msg) use ($isOwner) {
+            return $isOwner || (int) $msg['sender_id'] === (int) Auth::id();
+        });
         return Response::html(View::render('user-detail', [
             'user' => $user,
             'messages' => $messages,
-            'currentUser' => Auth::user(),
+            'currentUser' => $currentUser,
         ]));
     }
 
@@ -199,7 +213,7 @@ final class UserController
 
     private function downloadAvatarFromUrl(string $url, int $userId): ?string
     {
-        if (!preg_match('#^https?://#i', $url)) {
+        if (!$this->isAllowedAvatarUrl($url)) {
             return null;
         }
 
@@ -209,6 +223,12 @@ final class UserController
         ]);
         $raw = @file_get_contents($url, false, $context);
         if ($raw === false || strlen($raw) > 5 * 1024 * 1024) {
+            return null;
+        }
+
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mime = $finfo->buffer($raw) ?: '';
+        if (!in_array($mime, ['image/jpeg', 'image/png', 'image/gif', 'image/webp'], true)) {
             return null;
         }
 
@@ -232,5 +252,40 @@ final class UserController
         }
 
         return 'storage/uploads/avatars/' . $name;
+    }
+
+    private function isAllowedAvatarUrl(string $url): bool
+    {
+        if (!preg_match('#^https?://#i', $url)) {
+            return false;
+        }
+
+        $parts = parse_url($url);
+        if (!is_array($parts)) {
+            return false;
+        }
+
+        $host = strtolower((string) ($parts['host'] ?? ''));
+        if ($host === '' || in_array($host, ['localhost', '127.0.0.1', '::1'], true)) {
+            return false;
+        }
+
+        $port = isset($parts['port']) ? (int) $parts['port'] : null;
+        if ($port !== null && !in_array($port, [80, 443], true)) {
+            return false;
+        }
+
+        $ips = gethostbynamel($host);
+        if (!is_array($ips) || $ips === []) {
+            return false;
+        }
+
+        foreach ($ips as $ip) {
+            if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

@@ -1,6 +1,8 @@
 <?php
 
 declare(strict_types=1);
+
+use App\Core\Csrf;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -26,6 +28,7 @@ declare(strict_types=1);
         <?php endif; ?>
 
         <form action="/login" method="POST" class="space-y-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <input type="hidden" name="_csrf_token" value="<?= htmlspecialchars(Csrf::token()) ?>">
             <div>
                 <label class="block text-sm font-medium mb-1">Username</label>
                 <input type="text" name="username" required class="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-300" placeholder="yourname123">

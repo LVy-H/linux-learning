@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Core\Csrf;
+
 $title = 'My Profile';
 ob_start();
 ?>
@@ -15,6 +17,7 @@ ob_start();
 <?php endif; ?>
 
 <form method="POST" action="/me/update" enctype="multipart/form-data" class="bg-white border border-slate-200 rounded-xl p-5 space-y-3 max-w-2xl shadow-sm">
+    <input type="hidden" name="_csrf_token" value="<?= htmlspecialchars(Csrf::token()) ?>">
     <p><strong>Username:</strong> <?= htmlspecialchars($user['username']) ?> (cannot change)</p>
     <p><strong>Full Name:</strong> <?= htmlspecialchars($user['fullname']) ?> (cannot change)</p>
 

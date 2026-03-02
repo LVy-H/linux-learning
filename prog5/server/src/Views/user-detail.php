@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Core\Csrf;
+
 $title = 'User Detail';
 ob_start();
 ?>
@@ -31,6 +33,7 @@ ob_start();
         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm mt-4">
             <h2 class="text-lg font-semibold mb-2">Leave a message</h2>
             <form action="/users/<?= (int)$user['id'] ?>/messages" method="POST" class="space-y-2">
+                <input type="hidden" name="_csrf_token" value="<?= htmlspecialchars(Csrf::token()) ?>">
                 <textarea name="content" class="w-full border border-slate-300 rounded-lg p-2" rows="3" required></textarea>
                 <button type="submit" class="px-3 py-2 bg-slate-900 hover:bg-slate-700 text-white rounded-lg">Send</button>
             </form>
@@ -49,11 +52,13 @@ ob_start();
                         <p class="my-2"><?= nl2br(htmlspecialchars($m['content'])) ?></p>
                         <?php if (($currentUser['id'] ?? 0) === (int)$m['sender_id']): ?>
                             <form action="/messages/<?= (int)$m['id'] ?>/update" method="POST" class="space-y-2 mb-2">
+                                <input type="hidden" name="_csrf_token" value="<?= htmlspecialchars(Csrf::token()) ?>">
                                 <input type="hidden" name="receiver_id" value="<?= (int)$user['id'] ?>">
                                 <textarea name="content" class="w-full border border-slate-300 rounded-lg p-2" rows="2" required><?= htmlspecialchars($m['content']) ?></textarea>
                                 <button class="text-blue-700 underline" type="submit">Update</button>
                             </form>
                             <form action="/messages/<?= (int)$m['id'] ?>/delete" method="POST">
+                                <input type="hidden" name="_csrf_token" value="<?= htmlspecialchars(Csrf::token()) ?>">
                                 <input type="hidden" name="receiver_id" value="<?= (int)$user['id'] ?>">
                                 <button class="text-red-600 underline" type="submit">Delete</button>
                             </form>

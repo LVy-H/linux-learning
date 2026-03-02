@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Core\Csrf;
+
 $title = 'Assignments';
 ob_start();
 ?>
@@ -13,6 +15,7 @@ ob_start();
 
 <?php if (($currentUser['role'] ?? '') === 'teacher'): ?>
     <form method="POST" action="/teacher/assignments" enctype="multipart/form-data" class="bg-white border border-slate-200 rounded-xl p-5 space-y-3 mb-4 max-w-2xl shadow-sm">
+        <input type="hidden" name="_csrf_token" value="<?= htmlspecialchars(Csrf::token()) ?>">
         <h2 class="text-lg font-semibold">Upload assignment</h2>
         <input class="w-full border border-slate-300 rounded-lg p-2.5" name="title" placeholder="Title" required>
         <textarea class="w-full border border-slate-300 rounded-lg p-2.5" name="description" placeholder="Description" rows="3"></textarea>
@@ -31,6 +34,7 @@ ob_start();
 
             <?php if (($currentUser['role'] ?? '') === 'student'): ?>
                 <form method="POST" action="/assignments/<?= (int)$a['id'] ?>/submit" enctype="multipart/form-data" class="mt-3 flex flex-wrap items-center gap-2">
+                    <input type="hidden" name="_csrf_token" value="<?= htmlspecialchars(Csrf::token()) ?>">
                     <input class="border border-slate-300 rounded-lg p-2" type="file" name="submission_file" required>
                     <button class="px-3 py-2 bg-slate-900 hover:bg-slate-700 text-white rounded-lg" type="submit">Submit work</button>
                 </form>

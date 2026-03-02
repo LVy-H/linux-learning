@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Core\Csrf;
+
 $title = 'Users';
 ob_start();
 ?>
@@ -45,6 +47,7 @@ ob_start();
                         <?php if (($row['role'] ?? '') === 'student'): ?>
                             <a class="text-blue-700 underline" href="/teacher/students/<?= (int) $row['id'] ?>/edit">Edit</a>
                             <form action="/teacher/students/<?= (int) $row['id'] ?>/delete" method="POST" class="inline">
+                                <input type="hidden" name="_csrf_token" value="<?= htmlspecialchars(Csrf::token()) ?>">
                                 <button class="text-red-600 underline" type="submit" onclick="return confirm('Delete this student?')">Delete</button>
                             </form>
                         <?php endif; ?>
