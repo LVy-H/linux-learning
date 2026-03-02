@@ -1,23 +1,18 @@
 <?php
 
-declare(strict_types= 1);
+declare(strict_types=1);
 
+use App\Controllers\AuthController;
+use App\Controllers\HomeController;
 use App\Core\Router;
+use App\Controllers\UserController;
 
-return function (Router $router) {
-    $router->get('/', function() {
-        echo "<!DOCTYPE html>
-<html lang='en'>
-<head>
-    <meta charset='UTF-8'>
-    <title>Home</title>
-</head>
-<body>
-    <h1>Welcome to the Home Page</h1>
-</body>
-</html>";
-    });
-    $router->get("/user/{id}", function(string $id) {
-        echo "You are viewing the profile for User ID: " . htmlspecialchars($id);
-    });
+return function (Router $router): void {
+    $router->get('/', [HomeController::class, 'index']);
+    $router->get('/users', [UserController::class, 'index']);
+    $router->get('/users/{id}', [UserController::class, 'show']);
+
+    $router->get('/login', [AuthController::class, 'showLogin']);
+    $router->post('/login', [AuthController::class, 'login']);
+    $router->post('/logout', [AuthController::class, 'logout']);
 };

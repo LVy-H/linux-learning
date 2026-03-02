@@ -18,9 +18,11 @@ RUN a2enconf custom-apache2
 
 COPY server/ /var/www/html/
 
-# Ensure web files are readable by Apache
-RUN chown -R www-data:www-data /var/www/html \
- && chmod -R 755 /var/www/html
+# Ensure web files are readable and storage is writable by Apache
+RUN mkdir -p /var/www/html/storage/logs /var/www/html/storage/uploads \
+ && chown -R www-data:www-data /var/www/html \
+ && chmod -R 755 /var/www/html \
+ && chmod -R 775 /var/www/html/storage
 
 
 

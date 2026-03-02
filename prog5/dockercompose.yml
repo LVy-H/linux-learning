@@ -1,6 +1,11 @@
 services:
   web:
     build: .
+    command: >
+      sh -c "mkdir -p /var/www/html/storage/logs /var/www/html/storage/uploads
+      && chown -R www-data:www-data /var/www/html/storage
+      && chmod -R 775 /var/www/html/storage
+      && apache2-foreground"
     ports:
       - "8000:80"
     volumes:

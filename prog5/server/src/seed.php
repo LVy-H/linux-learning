@@ -1,16 +1,16 @@
 <?php
-require_once __DIR__ . '/../config/db.php';
-require_once __DIR__ . '/auth.php';
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/../autoload.php';
+
+use App\Core\Database;
 
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
-if (function_exists('init_db')) {
-  init_db();
-  echo "Database schema ensured.\n";
-} else {
-  echo "init_db() not found; ensure server/config/db.php provides it.\n";
-}
+Database::initSchema();
+echo "Database schema ensured.\n";
 
 $users = [
   ['username'=>'teacher1','password'=>'123456a@A','fullname'=>'Teacher One','role'=>'teacher','email'=> 'teacher1@example.com','phone'=>''],
@@ -19,15 +19,23 @@ $users = [
   ['username'=>'student2','password'=>'123456a@A','fullname'=>'Student Two','role'=>'student','email'=> 'student2@example.com','phone'=>''],
 ];
 
-$pdo = db();
+$pdo = Database::connection();
 $check = $pdo->prepare('SELECT id FROM users WHERE username = ?');
+$insert = $pdo->prepare('INSERT INTO users (username, password, fullname, email, phone, role) VALUES (?, ?, ?, ?, ?, ?)');
 foreach ($users as $u) {
   $check->execute([$u['username']]);
   if ($check->fetch()) {
     echo "User {$u['username']} already exists, skipping.\n";
     continue;
   }
-  $ok = register($u['username'], $u['password'], $u['fullname'], $u['email'], $u['phone'], $u['role']);
+  $ok = $insert->execute([
+    $u['username'],
+    password_hash($u['password'], PASSWORD_DEFAULT),
+    $u['fullname'],
+    $u['email'],
+    $u['phone'],
+    $u['role'],
+  ]);
   if ($ok) {
     echo "Inserted user {$u['username']}\n";
   } else {

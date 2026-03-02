@@ -35,9 +35,15 @@ class Router {
         foreach ($this->routes as $route) {
             if ($route['method'] === $method && preg_match($route['regex'], $uri, $matches)) {
                 $params = array_filter($matches, fn($key) => is_string($key), ARRAY_FILTER_USE_KEY);   
+                $args = array_values($params);
                 $handler = $route['handler'];
                 if (is_callable($handler)) {
-                    $handler(...$params);
+                    $result = $handler(...$args);
+                    if ($result instanceof Response) {
+                        $result->send();
+                    } elseif (is_string($result)) {
+                        echo $result;
+                    }
                     return;
                 }
 
@@ -45,7 +51,12 @@ class Router {
                     [$controllerClass, $methodName] = $handler;
                     if (class_exists($controllerClass) && method_exists($controllerClass, $methodName)) {
                         $controller = new $controllerClass();
-                        $controller->$methodName(...$params);
+                        $result = $controller->$methodName(...$args);
+                        if ($result instanceof Response) {
+                            $result->send();
+                        } elseif (is_string($result)) {
+                            echo $result;
+                        }
                         return;
                     }
                 }
