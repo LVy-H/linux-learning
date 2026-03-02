@@ -1,7 +1,7 @@
 <?php
 
 function login($username, $password) {
-    global $pdo;
+    $pdo = db();
 
     $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
     $stmt->execute([$username]);
@@ -16,7 +16,7 @@ function login($username, $password) {
 }
 
 function register($username, $password, $fullname, $email, $phone, $role) {
-    global $pdo;
+    $pdo = db();
 
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 

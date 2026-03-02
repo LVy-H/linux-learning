@@ -19,6 +19,7 @@ $users = [
   ['username'=>'student2','password'=>'123456a@A','fullname'=>'Student Two','role'=>'student','email'=> 'student2@example.com','phone'=>''],
 ];
 
+$pdo = db();
 $check = $pdo->prepare('SELECT id FROM users WHERE username = ?');
 foreach ($users as $u) {
   $check->execute([$u['username']]);
