@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Core\Auth;
 use App\Core\Response;
 use App\Core\View;
 use App\Models\User;
@@ -12,14 +13,15 @@ final class AuthController
 {
     public function showLogin(): Response
     {
+        if (Auth::isLoggedIn()) {
+            return Response::redirect('/users');
+        }
         return Response::html(View::render('login', ['error_message' => '']));
     }
 
     public function login(): Response
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+        Auth::start();
 
         $username = trim((string) ($_POST['username'] ?? ''));
         $password = (string) ($_POST['password'] ?? '');
@@ -28,9 +30,7 @@ final class AuthController
         if ($user && password_verify($password, $user['password'])) {
             session_regenerate_id(true);
             $_SESSION['user_id'] = $user['id'];
-            $_SESSION['is_admin'] = ($user['role'] === 'teacher');
-            header('Location: /users');
-            return Response::html('');
+            return Response::redirect('/users');
         }
 
         return Response::html(View::render('login', ['error_message' => 'Invalid credentials. Please try again.']), 401);
@@ -38,13 +38,10 @@ final class AuthController
 
     public function logout(): Response
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+        Auth::start();
         session_unset();
         session_destroy();
-        header('Location: /login');
-        return Response::html('');
+        return Response::redirect('/login');
     }
 
 }

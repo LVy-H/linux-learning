@@ -47,8 +47,14 @@ final class Database
             email VARCHAR(255),
             phone VARCHAR(20),
             role ENUM('teacher', 'student') NOT NULL DEFAULT 'student',
+            avatar_path VARCHAR(255) NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+        $hasAvatarPath = $pdo->query("SHOW COLUMNS FROM users LIKE 'avatar_path'")->fetch();
+        if (!$hasAvatarPath) {
+            $pdo->exec("ALTER TABLE users ADD COLUMN avatar_path VARCHAR(255) NULL");
+        }
 
         $pdo->exec("CREATE TABLE IF NOT EXISTS messages (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -56,27 +62,41 @@ final class Database
             receiver_id INT NOT NULL,
             content TEXT NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP NULL,
+            updated_at TIMESTAMP NULL DEFAULT NULL,
             FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
             FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
-        $pdo->exec("CREATE TABLE IF NOT EXISTS exercises (
+        $pdo->exec("CREATE TABLE IF NOT EXISTS assignments (
             id INT AUTO_INCREMENT PRIMARY KEY,
+            teacher_id INT NOT NULL,
             title VARCHAR(255) NOT NULL,
             description TEXT,
             file_path VARCHAR(255) NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (teacher_id) REFERENCES users(id) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
         $pdo->exec("CREATE TABLE IF NOT EXISTS submissions (
             id INT AUTO_INCREMENT PRIMARY KEY,
-            exercise_id INT NOT NULL,
+            assignment_id INT NOT NULL,
             student_id INT NOT NULL,
             file_path VARCHAR(255) NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (exercise_id) REFERENCES exercises(id) ON DELETE CASCADE,
+            FOREIGN KEY (assignment_id) REFERENCES assignments(id) ON DELETE CASCADE,
             FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+        $hasAssignmentId = $pdo->query("SHOW COLUMNS FROM submissions LIKE 'assignment_id'")->fetch();
+        if (!$hasAssignmentId) {
+            $hasExerciseId = $pdo->query("SHOW COLUMNS FROM submissions LIKE 'exercise_id'")->fetch();
+            if ($hasExerciseId) {
+                $pdo->exec("ALTER TABLE submissions ADD COLUMN assignment_id INT NULL");
+                $pdo->exec("UPDATE submissions SET assignment_id = exercise_id WHERE assignment_id IS NULL");
+            } else {
+                $pdo->exec("ALTER TABLE submissions ADD COLUMN assignment_id INT NULL");
+            }
+        }
+
     }
 }

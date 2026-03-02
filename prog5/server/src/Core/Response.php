@@ -23,6 +23,10 @@ final class Response {
         return new self($html, $status, array_merge($headers, ['Content-Type' => 'text/html']));
     }
 
+    public static function redirect(string $location, int $status = 302): self {
+        return new self('', $status, ['Location' => $location]);
+    }
+
     public function send(): void {
         http_response_code($this->status);
         foreach ($this->headers as $key => $value) {

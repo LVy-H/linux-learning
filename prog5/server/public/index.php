@@ -13,7 +13,12 @@ if ($env === 'development') {
 }
 require_once __DIR__ . '/../autoload.php';
 
+use App\Core\Auth;
+use App\Core\Database;
 use App\Core\Router;
+
+Auth::start();
+Database::initSchema();
 
 $router = new Router();
 $routes = require __DIR__ . '/../config/routes.php';
