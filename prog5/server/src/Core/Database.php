@@ -98,5 +98,50 @@ final class Database
             }
         }
 
+        $hasExerciseId = $pdo->query("SHOW COLUMNS FROM submissions LIKE 'exercise_id'")->fetch();
+        if ($hasExerciseId) {
+            $pdo->exec("UPDATE submissions SET assignment_id = exercise_id WHERE assignment_id IS NULL");
+        }
+
+        $hasNullAssignment = $pdo->query("SELECT 1 FROM submissions WHERE assignment_id IS NULL LIMIT 1")->fetch();
+        if (!$hasNullAssignment) {
+            $existingFk = $pdo->query(
+                "SELECT CONSTRAINT_NAME
+                 FROM information_schema.KEY_COLUMN_USAGE
+                 WHERE TABLE_SCHEMA = DATABASE()
+                   AND TABLE_NAME = 'submissions'
+                   AND COLUMN_NAME = 'assignment_id'
+                   AND REFERENCED_TABLE_NAME = 'assignments'
+                 LIMIT 1"
+            )->fetchColumn();
+
+            if (!$existingFk) {
+                $pdo->exec("ALTER TABLE submissions ADD CONSTRAINT fk_submissions_assignment FOREIGN KEY (assignment_id) REFERENCES assignments(id) ON DELETE CASCADE");
+            }
+
+            if ($hasExerciseId) {
+                $legacyFk = $pdo->query(
+                    "SELECT CONSTRAINT_NAME
+                     FROM information_schema.KEY_COLUMN_USAGE
+                     WHERE TABLE_SCHEMA = DATABASE()
+                       AND TABLE_NAME = 'submissions'
+                       AND COLUMN_NAME = 'exercise_id'
+                       AND REFERENCED_TABLE_NAME IS NOT NULL
+                     LIMIT 1"
+                )->fetchColumn();
+
+                if ($legacyFk) {
+                    $pdo->exec("ALTER TABLE submissions DROP FOREIGN KEY `" . $legacyFk . "`");
+                }
+
+                $pdo->exec("ALTER TABLE submissions DROP COLUMN exercise_id");
+            }
+
+            $assignmentColumn = $pdo->query("SHOW COLUMNS FROM submissions LIKE 'assignment_id'")->fetch();
+            if (is_array($assignmentColumn) && strtoupper((string)($assignmentColumn['Null'] ?? 'YES')) === 'YES') {
+                $pdo->exec("ALTER TABLE submissions MODIFY assignment_id INT NOT NULL");
+            }
+        }
+
     }
 }

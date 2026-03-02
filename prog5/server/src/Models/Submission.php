@@ -18,16 +18,12 @@ final class Submission
 
     public function allForTeacher(): array
     {
-        $pdo = Database::connection();
-        $hasAssignmentId = $pdo->query("SHOW COLUMNS FROM submissions LIKE 'assignment_id'")->fetch();
-        $joinColumn = $hasAssignmentId ? 'assignment_id' : 'exercise_id';
-
-        $stmt = $pdo->query(
+        $stmt = Database::connection()->query(
             'SELECT s.id, s.file_path, s.created_at,
                     a.id AS assignment_id, a.title AS assignment_title,
                     u.id AS student_id, u.fullname AS student_name, u.username AS student_username
              FROM submissions s
-             JOIN assignments a ON a.id = s.' . $joinColumn . '
+             JOIN assignments a ON a.id = s.assignment_id
              JOIN users u ON u.id = s.student_id
              ORDER BY s.created_at DESC'
         );
