@@ -9,8 +9,12 @@ RUN apt-get update \
     && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
 
-RUN sed -ri "s|DocumentRoot /var/www/html|DocumentRoot ${APACHE_DOCUMENT_ROOT}|g" /etc/apache2/sites-available/*.conf \
- && sed -ri "s|<Directory /var/www/>|<Directory ${APACHE_DOCUMENT_ROOT}>|g" /etc/apache2/apache2.conf
+# Set Apache document root
+RUN sed -ri "s|DocumentRoot /var/www/html|DocumentRoot ${APACHE_DOCUMENT_ROOT}|g" /etc/apache2/sites-available/*.conf
+
+# Enable custom Apache config (AllowOverride All for public/)
+COPY apache2.conf /etc/apache2/conf-available/custom-apache2.conf
+RUN a2enconf custom-apache2
 
 COPY server/ /var/www/html/
 
