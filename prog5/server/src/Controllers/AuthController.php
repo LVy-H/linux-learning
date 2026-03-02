@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Core\Response;
+use App\Core\View;
 use App\Models\User;
 
 final class AuthController
 {
     public function showLogin(): Response
     {
-        return Response::html($this->render('login', ['error_message' => '']));
+        return Response::html(View::render('login', ['error_message' => '']));
     }
 
     public function login(): Response
@@ -32,7 +33,7 @@ final class AuthController
             return Response::html('');
         }
 
-        return Response::html($this->render('login', ['error_message' => 'Invalid credentials. Please try again.']), 401);
+        return Response::html(View::render('login', ['error_message' => 'Invalid credentials. Please try again.']), 401);
     }
 
     public function logout(): Response
@@ -46,11 +47,4 @@ final class AuthController
         return Response::html('');
     }
 
-    private function render(string $view, array $data = []): string
-    {
-        extract($data, EXTR_SKIP);
-        ob_start();
-        require __DIR__ . '/../Views/' . $view . '.php';
-        return (string) ob_get_clean();
-    }
 }
